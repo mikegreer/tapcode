@@ -5,6 +5,14 @@ var cursorY = 0;
 
 //defaults
 function clearCanvas() {
+    var fillSave = ctx.fillStyle;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, 400, 400);
+    ctx.fillStyle = fillSave;
+}
+
+function resetCanvas() {
     cursorX = 0;
     cursorY = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -15,7 +23,18 @@ function clearCanvas() {
     ctx.lineWidth = 2;
     ctx.globalAlpha = 1;
 }
-clearCanvas();
+resetCanvas();
+
+// var doLoop;
+// function animate(){
+//     //stub to be overwritten by usercode
+// }
+// //usercode
+// function loop() {
+//     animate();
+//     doLoop = requestAnimationFrame(loop);
+// }
+// loop();
 
 function moveTo(x, y){
     cursorX = x;

@@ -112,6 +112,13 @@ var commands = {
                 }
             }
         },
+    },
+    "control": {
+        "animate": {
+            "labelstub": "function animate () {",
+            "labelclose": "}",
+            "type": "control"
+        },
     }
 };
 
@@ -143,8 +150,8 @@ function advanceCursor(){
     }else{
         var nextObject = currentHighlight.parentNode.nextSibling;
         if(nextObject.classList.contains("emptyLine")){
-            var lastLine = document.querySelector(".emptyLine");
-            moveCursor(lastLine);
+            var emptyLine = document.querySelector(".emptyLine");
+            moveCursor(emptyLine);
             readCode();
         }
         else{
@@ -201,16 +208,19 @@ function numPressed(target){
     if(attr === "done"){
         hideNumpad();
         advanceCursor();
+        readCode();
     }
 }
 
 function colorPressed(target){
+    hideNumpad();
     var param = document.querySelector(".highlight");
     var newValue = "\"" + target.getAttribute("data-value") + "\"";
     param.setAttribute("data-value", newValue);
     param.childNodes[0].nodeValue = newValue;
     hideColorgrid();
     advanceCursor();
+    readCode();
 }
 
 function hideNumpad(){
@@ -231,6 +241,18 @@ function showColorgrid(){
     colorpad.style.display = "block";
 }
 
+function createEmptyLine(){
+    var codeInsert = document.createElement("span")
+    codeInsert.classList.add("codeblock");
+    codeInsert.classList.add("emptyLine");
+    codeInsert.addEventListener("click", function(event){
+        if(event.target.classList.contains("codeblock")){
+            moveCursor(event.target);
+        }
+    });
+    return codeInsert;
+}
+
 function returnDOM(element) {
     var domElem = document.createElement("span");
     domElem.classList.add("codeblock");
@@ -239,6 +261,16 @@ function returnDOM(element) {
     var labelStubText = document.createTextNode(element.labelstub);
     labelStub.appendChild(labelStubText);
     domElem.appendChild(labelStub);
+    if(element.type === "control"){
+        labelStub.style.display = "block";
+        var empty = createEmptyLine();
+        domElem.appendChild(empty);
+        var labelClose = document.createElement("span");
+        labelClose.classList.add("labelclose");
+        var labelCloseText = document.createTextNode(element.labelclose);
+        labelClose.appendChild(labelCloseText);
+        domElem.appendChild(labelClose);
+    }
     if(element.type === "function"){
         var openBracket = document.createElement("span");
         openBracket.appendChild(document.createTextNode("("));
@@ -289,9 +321,12 @@ function createCodeElement(e, commandObj) {
     var editing = document.querySelector(".editing");
     if(carat){
         if(!carat.parentNode.classList.contains("emptyLine")){
-            codeContainer.insertBefore(codeInsert, carat.parentNode.nextSibling);
+            var caratPos = carat.parentNode.nextSibling;
+            caratPos.parentNode.insertBefore(codeInsert, caratPos);
         }else{
-            codeContainer.insertBefore(codeInsert, document.querySelector(".emptyLine"));
+            // insert code before empty line
+            var empty = carat.parentNode;
+            empty.parentNode.insertBefore(codeInsert, empty);
         }
     }
     if(highlight){
@@ -301,11 +336,21 @@ function createCodeElement(e, commandObj) {
         codeContainer.replaceChild(codeInsert, editing.parentNode);
     }
     if(!highlight && !carat && !editing){
-        codeContainer.insertBefore(codeInsert, document.querySelector(".emptyLine"));
+        var nextEmptyLine = document.querySelector(".emptyLine");
+        if(nextEmptyLine){
+            nextEmptyLine.parentNode.insertBefore(codeInsert, nextEmptyLine);
+        }else{
+            codeContainer.insertBefore(codeInsert, nextEmptyLine);
+        }
     }
     var label = codeInsert.querySelector(".label");
     if(label != undefined){
         label.addEventListener('click', editLine);
+    }
+    var blocksList = codeInsert.querySelector(".emptyLine");
+    if(blocksList){
+        //move carat to empty line.
+        moveCursor(blocksList);
     }
     var paramsList = codeInsert.querySelectorAll(".param");
     if(paramsList.length > 0){
@@ -344,6 +389,8 @@ function createLabel(commandObj){
 }
 
 function constructToolBoxTab(commandsObj) {
+    hideNumpad();
+    hideColorgrid();
     var tab = document.createElement("span");
     tab.classList.add("tab");
     for (var key in commandsObj) {
@@ -384,13 +431,22 @@ function changeToolbox(menuItem, commands){
 }
 
 function readCode(){
-    clearCanvas();
+    resetCanvas();
     //console.log(codeContainer.innerHTML);
     var tmp = document.createElement("DIV");
     tmp.innerHTML = codeContainer.innerHTML;
-    console.log(tmp.textContent || tmp.innerText || "");
+//    console.log(tmp.textContent || tmp.innerText || "");
     var outputJS = tmp.textContent || tmp.innerText || "";
-    eval(outputJS);
+    var prependJS = "var doLoop; function animate(){}"
+    var appendJS = "function loop() {"
+                        +"animate();"
+                        +"doLoop = requestAnimationFrame(loop);"
+                    +"}"
+                    +"loop();";
+    var usercode = "";
+    usercode = prependJS + outputJS + appendJS;
+    console.log(usercode);
+    eval(usercode);
 }
 
 function init(){
@@ -410,13 +466,13 @@ function init(){
        }
     }
     // ADD ENTER BUTTON
-    var inputElement = document.createElement("span");
-    var inputElementLabel = document.createTextNode("enter");
-    inputElement.appendChild(inputElementLabel);
-    inputElement.id = "enter";
-    inputElement.classList.add("tapinput");
-    inputElement.addEventListener("click", advanceCursor);
-    toolbox.appendChild(inputElement);
+    // var inputElement = document.createElement("span");
+    // var inputElementLabel = document.createTextNode("enter");
+    // inputElement.appendChild(inputElementLabel);
+    // inputElement.id = "enter";
+    // inputElement.classList.add("tapinput");
+    // inputElement.addEventListener("click", advanceCursor);
+    // toolbox.appendChild(inputElement);
 
     //create toolbox
     changeToolbox(document.querySelector(".menu-item"), commands.drawing);
