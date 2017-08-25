@@ -19,9 +19,20 @@ function clearCursors(){
     }
 }
 
+function getNextEditable(currentElement){
+    console.log(currentElement);
+    var params = codeContainer.querySelectorAll(".param");
+    for(var i = 0; i < params.length; i++){
+        if(params[i] === currentElement){
+            return params[i+1];
+        }
+    }
+    //check if no results
+    //find next empty line where no results.
+}
+
 function advanceCursor(){
     var currentHighlight = document.querySelector(".highlight");
-    console.log(currentHighlight);
     if(currentHighlight){
         console.log(currentHighlight);
         currentHighlight.classList.remove("highlight");
@@ -30,15 +41,23 @@ function advanceCursor(){
             nextParam.classList.add("highlight");
             parameterClicked(nextParam);
         }else{
-            var nextObject = currentHighlight.parentNode.nextSibling;
-            if(nextObject.classList.contains("emptyLine")){
-                var emptyLine = document.querySelector(".emptyLine");
-                moveCursor(emptyLine);
-                readCode();
+            var nextObject = getNextEditable(currentHighlight);
+            if(nextObject){
+                nextObject.classList.add("highlight");
             }
-            else{
-                currentHighlight.parentNode.nextSibling.firstChild.classList.add("highlight");
-            }
+            //deal with empty lines.
+
+
+            // var nextObject = currentHighlight.parentNode.nextSibling;
+            // console.log(nextObject);
+            // if(nextObject.classList.contains("emptyLine")){
+            //     var emptyLine = document.querySelector(".emptyLine");
+            //     moveCursor(emptyLine);
+            //     readCode();
+            // }
+            // else{
+            //     currentHighlight.parentNode.nextSibling.firstChild.classList.add("highlight");
+            // }
         }
     }
 }
@@ -160,6 +179,9 @@ function createCodeElement(e, commandObj) {
     }else{
         var domElem = document.createElement("span");
         domElem.classList.add("codeblock");
+        if(commandObj.type === "value"){
+            domElem.classList.add("inline-codeblock");
+        }
         var labelStub = document.createElement("span");
         labelStub.classList.add("label");
         var labelStubText = document.createTextNode(commandObj.labelstub);
@@ -241,8 +263,9 @@ function createCodeElement(e, commandObj) {
         }else{
             if(carat){
                 if(!carat.parentNode.classList.contains("emptyLine")){
-                    var caratPos = carat.parentNode.nextSibling;
-                    caratPos.parentNode.insertBefore(codeInsert, caratPos);
+                    var nextEditable = getNextEditable(carat);
+                    //var caratPos = carat.parentNode.nextSibling;
+                    nextEditable.parentNode.insertBefore(codeInsert, nextEditable);
                 }else{
                     // insert code before empty line
                     var empty = carat.parentNode;
@@ -263,31 +286,31 @@ function createCodeElement(e, commandObj) {
                     codeContainer.insertBefore(codeInsert, nextEmptyLine);
                 }
             }
-            var label = codeInsert.querySelector(".label");
-            if(label != undefined){
-                label.addEventListener('click', editLine);
-            }
-            var blocksList = codeInsert.querySelector(".emptyLine");
-            if(blocksList){
-                //move carat to empty line.
-                moveCursor(blocksList);
-            }
-            var paramsList = codeInsert.querySelectorAll(".param");
-            if(paramsList.length > 0){
-                editParam(commandObj, paramsList[0]);
-            }
-            for(var i = 0; i < paramsList.length; i++){
-                if(paramsList[i].getAttribute("param-type") != "function"){
-                    paramsList[i].addEventListener('click', function(event){
-                        parameterClicked(event.target);
-                    });
-                }
+        }
+        var label = codeInsert.querySelector(".label");
+        if(label != undefined){
+            label.addEventListener('click', editLine);
+        }
+        var blocksList = codeInsert.querySelector(".emptyLine");
+        if(blocksList){
+            //move carat to empty line.
+            moveCursor(blocksList);
+        }
+        var paramsList = codeInsert.querySelectorAll(".param");
+        if(paramsList.length > 0){
+            editParam(commandObj, paramsList[0]);
+        }
+        for(var i = 0; i < paramsList.length; i++){
+            if(paramsList[i].getAttribute("param-type") != "function"){
+                console.log(paramsList[i]);
+                paramsList[i].addEventListener('click', function(event){
+                    parameterClicked(event.target);
+                });
             }
         }
     }
 }
-//create default empty line
-createCodeElement();
+
 
 //label for toolbox
 function createLabel(commandObj){
@@ -369,6 +392,11 @@ function init(){
            })();
        }
     }
+
+    //create default empty line
+    var empty = createEmptyLine();
+    codeContainer.appendChild(empty);
+    
     // ADD ENTER BUTTON
     // var inputElement = document.createElement("span");
     // var inputElementLabel = document.createTextNode("enter");
