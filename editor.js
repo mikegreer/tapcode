@@ -19,16 +19,48 @@ function clearCursors(){
     }
 }
 
+
+function hasClass(elem, cls) {
+    var str = " " + elem.className + " ";
+    var testCls = " " + cls + " ";
+    return(str.indexOf(testCls) != -1) ;
+}
+
+function nextByClass(node, cls) {
+    while (node = node.nextSibling) {
+        if (hasClass(node, cls)) {
+            return node;
+        }
+    }
+    return null;
+}
+
 function getNextEditable(currentElement){
-    console.log(currentElement);
     var params = codeContainer.querySelectorAll(".param");
+    var param;
+    //if cursor on an attribute / param
     for(var i = 0; i < params.length; i++){
         if(params[i] === currentElement){
+            param = params[i+1];
             return params[i+1];
         }
     }
-    //check if no results
-    //find next empty line where no results.
+
+    if(!param){
+        var currentCodeBlock = currentElement.parentNode;
+        if(currentElement.classList.contains("carat")){
+            //if cursor on end of line
+            var codeBlocks = codeContainer.querySelectorAll(".codeblock");
+            var currentBlock;
+            for(var i = 0; i < codeBlocks.length; i++){
+                if(codeBlocks[i] === currentCodeBlock){
+                    currentBlock = codeBlocks[i];
+                    nextBlock = nextByClass(currentBlock, "codeblock");
+                    return nextBlock;
+                }
+            }
+        }
+    }
 }
 
 function advanceCursor(){
@@ -45,19 +77,6 @@ function advanceCursor(){
             if(nextObject){
                 nextObject.classList.add("highlight");
             }
-            //deal with empty lines.
-
-
-            // var nextObject = currentHighlight.parentNode.nextSibling;
-            // console.log(nextObject);
-            // if(nextObject.classList.contains("emptyLine")){
-            //     var emptyLine = document.querySelector(".emptyLine");
-            //     moveCursor(emptyLine);
-            //     readCode();
-            // }
-            // else{
-            //     currentHighlight.parentNode.nextSibling.firstChild.classList.add("highlight");
-            // }
         }
     }
 }
@@ -396,7 +415,7 @@ function init(){
     //create default empty line
     var empty = createEmptyLine();
     codeContainer.appendChild(empty);
-    
+
     // ADD ENTER BUTTON
     // var inputElement = document.createElement("span");
     // var inputElementLabel = document.createTextNode("enter");

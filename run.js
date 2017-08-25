@@ -83,13 +83,13 @@ function moveBy(x, y){
 }
 function circle(r){
     ctx.beginPath();
-    ctx.arc(cursorX + r, cursorY + r, r, 0, 2 * Math.PI, false);
+    ctx.arc(cursorX, cursorY, r, 0, 2 * Math.PI, false);
     ctx.fill();
     ctx.stroke();
 }
 function square(s){
-    ctx.fillRect(cursorX, cursorY, s, s);
-    ctx.strokeRect(cursorX, cursorY, s, s);
+    ctx.fillRect(cursorX - (s / 2), cursorY - (s / 2), s, s);
+    ctx.strokeRect(cursorX - (s / 2), cursorY - (s / 2), s, s);
 }
 function lineTo(startX, startY, endX, endY){
     ctx.beginPath();
