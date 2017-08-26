@@ -34,6 +34,13 @@
             position: relative;
             background-color: #999;
         }
+        .menu{
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background-color: #333;
+            padding: 0 4px;
+        }
         .toolbox-menu{
             position: absolute;
             top: 0;
@@ -128,7 +135,7 @@
         .outputcanvas{
             position: absolute;
             z-index: 1;
-            top: 0;
+            top: 40px;
             left: 0;
             width: 400px;
         }
@@ -137,6 +144,12 @@
     <body>
         <canvas class="outputcanvas" width="400" height="400"></canvas>
         <div class="wrapper">
+
+            <div class="menu">
+                <div class="menu-item">Kano</div>
+                <div class="menu-item">About</div>
+                <div class="menu-item">Shop</div>
+            </div>
             <div class="code"></div>
             <div class="toolbox">
                 <div class="toolbox-menu"></div>

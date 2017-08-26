@@ -6,8 +6,6 @@ var cursorY = 0;
 function readCode(){
     'use strict';
     resetCanvas();
-    console.log(cursorX, cursorY);
-    //console.log(codeContainer.innerHTML);
     var tmp = document.createElement("DIV");
     tmp.innerHTML = codeContainer.innerHTML;
 //    console.log(tmp.textContent || tmp.innerText || "");

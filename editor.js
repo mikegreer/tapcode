@@ -35,7 +35,7 @@ function nextByClass(node, cls) {
     return null;
 }
 
-function getNextEditable(currentElement){
+function getNextEditableParam(currentElement){
     var params = codeContainer.querySelectorAll(".param");
     var param;
     //if cursor on an attribute / param
@@ -63,17 +63,33 @@ function getNextEditable(currentElement){
     }
 }
 
+function getNextCodeblock(currentElement){
+    //traverse up from currentElement untill hits codeblock
+    var currentCodeBlock;
+    if(currentElement.classList.contains("codeblock")){
+        currentCodeBlock = currentElement;
+    }
+    else if(currentElement.parentNode.classList.contains("codeblock")){
+        currentCodeBlock = currentElement.parentNode;
+    }
+    nextBlock = nextByClass(currentCodeBlock, "codeblock");
+    if(nextBlock === null){
+        //nothing at this level, move up one.
+        nextBlock = nextByClass(currentCodeBlock.parentNode, "codeblock");
+    }
+    return nextBlock;
+}
+
 function advanceCursor(){
     var currentHighlight = document.querySelector(".highlight");
     if(currentHighlight){
-        console.log(currentHighlight);
         currentHighlight.classList.remove("highlight");
         var nextParam = currentHighlight.nextSibling.nextSibling;
         if(nextParam){
             nextParam.classList.add("highlight");
             parameterClicked(nextParam);
         }else{
-            var nextObject = getNextEditable(currentHighlight);
+            var nextObject = getNextEditableParam(currentHighlight);
             if(nextObject){
                 nextObject.classList.add("highlight");
             }
@@ -132,14 +148,11 @@ function numPressed(target){
             if(param.getAttribute("param-type") === "number"){
                 //editor is currently editing value
                 var newValue = param.getAttribute("data-value");
-                // console.log(newValue);
                 if(newValue != null && newValue != ""){
-                    console.log(newValue);
                     param.setAttribute("data-default-value", newValue);
                 }
             }
         }
-        console.log(param.getAttribute("data-default-value"));
         hideNumpad();
         advanceCursor();
         readCode();
@@ -273,16 +286,14 @@ function createCodeElement(e, commandObj) {
     if(commandObj){
         //if param, insert over current highlight value, or error
         if(commandObj.type === "value"){
-            console.log("value");
             if(highlight){
-                console.log(highlight);
                 highlight.parentNode.replaceChild(codeInsert, highlight);
             }
         //not param, so replace line, or insert new line
         }else{
             if(carat){
                 if(!carat.parentNode.classList.contains("emptyLine")){
-                    var nextEditable = getNextEditable(carat);
+                    var nextEditable = getNextEditableParam(carat);
                     //var caratPos = carat.parentNode.nextSibling;
                     nextEditable.parentNode.insertBefore(codeInsert, nextEditable);
                 }else{
@@ -292,7 +303,9 @@ function createCodeElement(e, commandObj) {
                 }
             }
             if(highlight){
-                highlight.parentNode.parentNode.insertBefore(codeInsert, highlight.parentNode.nextSibling);
+                var nextBlock = getNextCodeblock(highlight);
+                nextBlock.parentNode.insertBefore(codeInsert, nextBlock);
+            //    highlight.parentNode.parentNode.insertBefore(codeInsert, highlight.parentNode.nextSibling);
             }
             if(editing){
                 editing.parentNode.parentNode.replaceChild(codeInsert, editing.parentNode);
@@ -321,7 +334,6 @@ function createCodeElement(e, commandObj) {
         }
         for(var i = 0; i < paramsList.length; i++){
             if(paramsList[i].getAttribute("param-type") != "function"){
-                console.log(paramsList[i]);
                 paramsList[i].addEventListener('click', function(event){
                     parameterClicked(event.target);
                 });
