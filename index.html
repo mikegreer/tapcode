@@ -10,25 +10,73 @@
             -ms-user-select: none;      /* IE 10+ */
             user-select: none;
         }
+        html, body {
+            height: 100%;
+        }
         body{
             margin: 0;
             box-sizing: border-box;
             overflow: hidden;
+            display: flex;
+            height: 100%;
         }
-        li{
-            margin: 0;
+
+        /*main page layout*/
+        .outputcanvas{
+            position: absolute;
+            z-index: 1;
+            top: 40px;
+            left: 0;
+            width: 400px;
+        }
+        .wrapper{
+            display: flex;
+            flex-flow: column;
+            height: 100%;
+            width: 100%;
+            z-index: 2;
+            position: relative;
+        }
+        .menu{
+            width: 100%;
+            height: 40px;
+            background-color: #333;
+            padding: 0 4px;
         }
         .code-wrapper{
             display: flex;
+            flex-flow: row;
             width: 100%;
+            flex: 1;
             overflow: scroll;
+            background-color: #000;
+            position: relative;
+        }
+        .toolbox-menu{
+            width: 100%;
+            height: 40px;
+            background-color: #333;
+            padding: 0 4px;
+        }
+        .toolbox-wrapper{
+            width: 100%;
+            height: 146px;
+            overflow: scroll;
+            box-sizing: border-box;
+            background-color: #999;
+        }
+        /* end main page layout*/
+
+        .code{
+            padding: 12px 0 0 5px;
+            width: 100%;
+            color: #fff;
         }
         .line-numbers{
-            order: 1;
             width: 20px;
             flex-basis: auto;
             padding-right: 4px;
-            padding: 20px 2px 0 0;
+            padding: 13px 2px 0 0;
             color: #666;
         }
         .line-numbers span{
@@ -38,56 +86,48 @@
             display: block;
             min-height: 26px;
         }
-        .code{
-            order: 1;
-            flex: 5;
-            padding: 20px 0 0 5px;
-            color: #fff;
-        }
         .line-numbers, .code{
             box-sizing: border-box;
             display: block;
-            height: 60vh;
             font-family: monospace;
             margin: 0;
             font-size: 16px;
         }
-        .toolbox{
-            width: 100%;
-            height: 40vh;
-            padding: 40px 10px 10px;
-            overflow: scroll;
-            box-sizing: border-box;
-            position: relative;
-            background-color: #999;
-        }
-        .menu{
-            position: relative;
-            width: 100%;
-            height: 40px;
-            background-color: #333;
-            padding: 0 4px;
-        }
-        .toolbox-menu{
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 40px;
-            background-color: #333;
-            padding: 0 4px;
-        }
+
         .menu-item{
             display: inline-block;
             line-height: 40px;
             vertical-align: middle;
             padding: 0 0 0 10px;
             color: #ffffff;
+            cursor: pointer;
             font-family: monospace;
         }
         .menu-selected{
             text-decoration: underline;
         }
+        .tab{
+            padding: 0 6px 8px;
+            display: block;
+        }
+        .soft-keys{
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 84px;
+            height: 40px;
+        }
+        #arrow-left, #arrow-right{
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            border-radius: 3px;
+            opacity: .4;
+            display: inline-block;
+            padding: 0;
+        }
+
+        /*code editing styles*/
         .highlight{
             color: #000;
             background-color: #fff;
@@ -138,6 +178,8 @@
             display: inline-block;
             background-color: #fff;
         }
+
+        /*input 'keyboard' styles */
         .numpad, .colorpad{
             display: none;
         }
@@ -145,26 +187,14 @@
             display: flex;
         }
         .numgrid, .colorgrid{
-            margin: 0px;
+            flex: 3;
             padding: 10px;
-            flex-grow: 1;
-            flex-shrink: 1;
             text-align: center;
             font-family: monospace;
             border: 1px solid #eee;
             cursor: pointer;
         }
-        .wrapper{
-            position: relative;
-            z-index: 2;
-        }
-        .outputcanvas{
-            position: absolute;
-            z-index: 1;
-            top: 40px;
-            left: 0;
-            width: 400px;
-        }
+
         </style>
     </head>
     <body>
@@ -173,59 +203,66 @@
 
             <div class="menu">
                 <div class="menu-item">Kano</div>
-                <div class="menu-item">About</div>
-                <div class="menu-item">Shop</div>
+
+                <div class="menu-item">codeset</div>
                 <div class="menu-item">save</div>
                 <div class="menu-item">load</div>
+                <div class="menu-item" id="clear">clear</div>
                 <div class="menu-item" id="refresh">refresh</div>
             </div>
 
             <div class="code-wrapper">
                 <div class="line-numbers"></div>
+                <div class="soft-keys">
+                    <div id="arrow-left"></div>
+                    <div id="arrow-right"></div>
+                </div>
                 <div class="code"></div>
             </div>
 
-            <div class="toolbox">
-                <div class="toolbox-menu"></div>
-                <div class="numpad">
-                    <div class="numpadrow">
-                        <div class="numgrid" data-value="1">1</div>
-                        <div class="numgrid" data-value="2">2</div>
-                        <div class="numgrid" data-value="3">3</div>
-                    </div>
-                    <div class="numpadrow">
-                        <div class="numgrid" data-value="4">4</div>
-                        <div class="numgrid" data-value="5">5</div>
-                        <div class="numgrid" data-value="6">6</div>
-                    </div>
-                    <div class="numpadrow">
-                        <div class="numgrid" data-value="7">7</div>
-                        <div class="numgrid" data-value="8">8</div>
-                        <div class="numgrid" data-value="9">9</div>
+            <div class="toolbox-menu"></div>
+            <div class="toolbox-wrapper">
+                <div class="toolbox">
+                    <div class="numpad">
+                        <div class="numpadrow">
+                            <div class="numgrid" data-value="1">1</div>
+                            <div class="numgrid" data-value="2">2</div>
+                            <div class="numgrid" data-value="3">3</div>
+                        </div>
+                        <div class="numpadrow">
+                            <div class="numgrid" data-value="4">4</div>
+                            <div class="numgrid" data-value="5">5</div>
+                            <div class="numgrid" data-value="6">6</div>
+                        </div>
+                        <div class="numpadrow">
+                            <div class="numgrid" data-value="7">7</div>
+                            <div class="numgrid" data-value="8">8</div>
+                            <div class="numgrid" data-value="9">9</div>
+                        </div>
+
+                        <div class="numpadrow">
+                            <div class="numgrid" data-value=".">.</div>
+                            <div class="numgrid" data-value="0">0</div>
+                            <div class="numgrid" data-value="done">done</div>
+                        </div>
                     </div>
 
-                    <div class="numpadrow">
-                        <div class="numgrid" data-value=".">.</div>
-                        <div class="numgrid" data-value="0">0</div>
-                        <div class="numgrid" data-value="done">done</div>
-                    </div>
-                </div>
-
-                <div class="colorpad">
-                    <div class="colorrow">
-                        <div class="colorgrid" data-value="#ff0000">#ff0000</div>
-                        <div class="colorgrid" data-value="#00ff00">#00ff00</div>
-                        <div class="colorgrid" data-value="#0000ff">#0000ff</div>
-                    </div>
-                    <div class="colorrow">
-                        <div class="colorgrid" data-value="#ffff00">#ffff00</div>
-                        <div class="colorgrid" data-value="#00ffff">#00ffff</div>
-                        <div class="colorgrid" data-value="#ff00ff">#ff00ff</div>
-                    </div>
-                    <div class="colorrow">
-                        <div class="colorgrid" data-value="#ffffff">#ffffff</div>
-                        <div class="colorgrid" data-value="#000000">#000000</div>
-                        <div class="colorgrid" data-value="#7f7f7f">#7f7f7f</div>
+                    <div class="colorpad">
+                        <div class="colorrow">
+                            <div class="colorgrid" data-value="#ff0000">#ff0000</div>
+                            <div class="colorgrid" data-value="#00ff00">#00ff00</div>
+                            <div class="colorgrid" data-value="#0000ff">#0000ff</div>
+                        </div>
+                        <div class="colorrow">
+                            <div class="colorgrid" data-value="#ffff00">#ffff00</div>
+                            <div class="colorgrid" data-value="#00ffff">#00ffff</div>
+                            <div class="colorgrid" data-value="#ff00ff">#ff00ff</div>
+                        </div>
+                        <div class="colorrow">
+                            <div class="colorgrid" data-value="#ffffff">#ffffff</div>
+                            <div class="colorgrid" data-value="#000000">#000000</div>
+                            <div class="colorgrid" data-value="#7f7f7f">#7f7f7f</div>
+                        </div>
                     </div>
                 </div>
             </div>

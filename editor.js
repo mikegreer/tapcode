@@ -36,31 +36,106 @@ function nextByClass(node, cls) {
     return null;
 }
 
+function previousByClass(node, cls) {
+    while (node = node.previousSibling) {
+        if (hasClass(node, cls)) {
+            return node;
+        }
+    }
+    return null;
+}
+
 function getNextEditableParam(currentElement){
-    var params = codeContainer.querySelectorAll(".param");
+    var params = currentElement.parentNode.querySelectorAll(".param");
     var param;
     //if cursor on an attribute / param
     for(var i = 0; i < params.length; i++){
         if(params[i] === currentElement){
             param = params[i+1];
-            return params[i+1];
-        }
-    }
-
-    if(!param){
-        var currentCodeBlock = currentElement.parentNode;
-        if(currentElement.classList.contains("carat")){
-            //if cursor on end of line
-            var codeBlocks = codeContainer.querySelectorAll(".codeblock");
-            var currentBlock;
-            for(var i = 0; i < codeBlocks.length; i++){
-                if(codeBlocks[i] === currentCodeBlock){
-                    currentBlock = codeBlocks[i];
-                    nextBlock = nextByClass(currentBlock, "codeblock");
-                    return nextBlock;
-                }
+            if(i+1 < params.length){
+                return params[i+1];
+            }else{
+                return getNextCodeblock(currentElement.parentNode);
             }
         }
+    }
+}
+
+function moveToPreviousEditable() {
+    //cursor on end of line
+    var carat = document.querySelector(".carat");
+    //cursor highlighting param
+    var highlight = document.querySelector(".highlight");
+    //cursor highlighting codeblock label
+    var editing = document.querySelector(".editing");
+
+    var previousEditable;
+    if(carat){
+        carat.classList.remove("carat");
+        previousEditable = getPreviousCodeblock(carat);
+    }
+    if(highlight){
+        highlight.classList.remove("highlight");
+        previousEditable = getNextEditableParam(highlight);
+    }
+    if(editing){
+        editing.classList.remove("editing");
+        labelsAndParams = editing.parentNode.querySelectorAll(".param, .label");
+        previousEditable = labelsAndParams[1];
+    }
+
+    if(previousEditable.classList.contains("param")){
+        previousEditable.classList.add("highlight");
+        parameterClicked(previousEditable);
+    }
+    else if(previousEditable.classList.contains("emptyLine")){
+        moveCursor(previousEditable);
+    }
+    else if(previousEditable.classList.contains("codeblock")){
+        var label = previousEditable.querySelector(".label");
+        label.classList.add("editing");
+    }
+    else if(previousEditable.classList.contains("label")){
+        previousEditable.classList.add("editing");
+    }
+}
+
+function moveToNextEditable() {
+    //cursor on end of line
+    var carat = document.querySelector(".carat");
+    //cursor highlighting param
+    var highlight = document.querySelector(".highlight");
+    //cursor highlighting codeblock label
+    var editing = document.querySelector(".editing");
+
+    var nextEditable;
+    if(carat){
+        carat.classList.remove("carat");
+        nextEditable = getNextCodeblock(carat);
+    }
+    if(highlight){
+        highlight.classList.remove("highlight");
+        nextEditable = getNextEditableParam(highlight);
+    }
+    if(editing){
+        editing.classList.remove("editing");
+        labelsAndParams = editing.parentNode.querySelectorAll(".param, .label, .emptyLine");
+        nextEditable = labelsAndParams[1];
+    }
+
+    if(nextEditable.classList.contains("param")){
+        nextEditable.classList.add("highlight");
+        parameterClicked(nextEditable);
+    }
+    else if(nextEditable.classList.contains("emptyLine")){
+        moveCursor(nextEditable);
+    }
+    else if(nextEditable.classList.contains("codeblock")){
+        var label = nextEditable.querySelector(".label");
+        label.classList.add("editing");
+    }
+    else if(nextEditable.classList.contains("label")){
+        nextEditable.classList.add("editing");
     }
 }
 
@@ -78,7 +153,26 @@ function getNextCodeblock(currentElement){
         //nothing at this level, move up one.
         nextBlock = nextByClass(currentCodeBlock.parentNode, "codeblock");
     }
+    console.log(nextBlock);
     return nextBlock;
+}
+
+function getPreviousCodeblock(currentElement){
+    //traverse up from currentElement untill hits codeblock
+    var currentCodeBlock;
+    if(currentElement.classList.contains("codeblock")){
+        currentCodeBlock = currentElement;
+    }
+    else if(currentElement.parentNode.classList.contains("codeblock")){
+        currentCodeBlock = currentElement.parentNode;
+    }
+    previousBlock = previousByClass(currentCodeBlock, "codeblock");
+    if(previousBlock === null){
+        //nothing at this level, move up one.
+        previousBlock = previousByClass(currentCodeBlock.parentNode, "codeblock");
+    }
+    console.log(previousBlock);
+    return previousBlock;
 }
 
 function advanceCursor(){
@@ -461,6 +555,16 @@ function init(){
     //add functionality to top menu
     var refreshBtn = topMenu.querySelector("#refresh");
     refreshBtn.addEventListener("click", readCode);
+    var clearBtn = topMenu.querySelector("#clear");
+    clearBtn.addEventListener("click", function() {
+        codeContainer.innerHTML = "";
+        codeContainer.appendChild(createEmptyLine());
+    });
+
+    var arrowLeft = document.querySelector("#arrow-left");
+    arrowLeft.addEventListener("click", moveToPreviousEditable);
+    var arrowRight = document.querySelector("#arrow-right");
+    arrowRight.addEventListener("click", moveToNextEditable);
 
     //create default empty line
     var empty = createEmptyLine();
