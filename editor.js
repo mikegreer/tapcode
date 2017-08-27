@@ -3,6 +3,7 @@
 var codeContainer = document.querySelector('.code');
 var toolbox = document.querySelector('.toolbox');
 var menu = document.querySelector(".toolbox-menu");
+var topMenu = document.querySelector(".menu");
 
 function clearCursors(){
     var carat = document.querySelector(".carat")
@@ -201,93 +202,109 @@ function createEmptyLine(){
     return codeInsert;
 }
 
-function createCodeElement(e, commandObj) {
-    //TODO: remove creating empty lines from this function.
-    //make commandObj required, and fill in createEmptyLine function
-    if (typeof commandObj === 'undefined'){
-        var codeInsert = document.createElement("span")
-        codeInsert.classList.add("codeblock");
-        codeInsert.classList.add("emptyLine");
-    }else{
-        var domElem = document.createElement("span");
-        domElem.classList.add("codeblock");
-        if(commandObj.type === "value"){
-            domElem.classList.add("inline-codeblock");
-        }
-        var labelStub = document.createElement("span");
-        labelStub.classList.add("label");
-        var labelStubText = document.createTextNode(commandObj.labelstub);
-        labelStub.appendChild(labelStubText);
-        domElem.appendChild(labelStub);
-        //if element has parameters, add them
-        if(commandObj.parameters){
-            var openBracket = document.createElement("span");
-            openBracket.appendChild(document.createTextNode("("));
-            domElem.appendChild(openBracket);
-            var i = 0;
-            for(var param in commandObj.parameters){
-                if (commandObj.parameters.hasOwnProperty(param)) {
-                    var paramNode = document.createElement("span");
-                    paramNode.classList.add("param");
-                    //add type to param
-                    paramNode.setAttribute("param-type", commandObj.parameters[param].type);
+function wrapElementInLi(element){
+    var listItem = document.createElement("li");
+    listItem.appendChild(element);
+    return listItem;
+}
 
-                    var param = commandObj.parameters[param];
-                    if(param.type === "color"){
-                        var paramString = "\"" + param.value + "\"";
-                    }else{
-                        var paramString = param.value;
-                    }
-                    paramNode.setAttribute("data-default-value", paramString);
-                    paramNode.appendChild(document.createTextNode(paramString));
-                    domElem.appendChild(paramNode);
-                    var paramCount = Object.keys(commandObj.parameters).length;
-                    if(i < paramCount - 1){
-                        var comma = document.createElement("span");
-                        comma.appendChild(document.createTextNode(", "));
-                        domElem.appendChild(comma);
-                    }
-                    i++;
-                }
-            }
-            if(commandObj.type != "control"){
-                var closeBracket = document.createElement("span");
-                if(commandObj.type != "value"){
-                    closeBracket.appendChild(document.createTextNode(");"));
-                }else{
-                    closeBracket.appendChild(document.createTextNode(")"));
-                }
-                domElem.appendChild(closeBracket);
-            }
-        }
-        if(commandObj.type === "control"){
-            //labelStub.style.display = "block";
-            var empty = createEmptyLine();
-            domElem.appendChild(empty);
-            var labelClose = document.createElement("span");
-            labelClose.classList.add("labelclose");
-            var labelCloseText = document.createTextNode(commandObj.labelclose);
-            labelClose.appendChild(labelCloseText);
-            domElem.appendChild(labelClose);
-        }
-        var codeInsert = domElem;
+function createCodeElement(e, commandObj) {
+    //create code element base
+    var domElem = document.createElement("span");
+    domElem.classList.add("codeblock");
+    if(commandObj.type === "value"){
+        domElem.classList.add("inline-codeblock");
+    }else if(commandObj.type === "function"){
+        domElem.classList.add("single-line-codeblock");
+    }else if(commandObj.type === "control"){
+        domElem.classList.add("multi-line-codeblock");
     }
-    codeInsert.addEventListener("click", function(event){
+
+    //all elements have a label
+    var labelStub = document.createElement("span");
+    labelStub.classList.add("label");
+    var labelStubText = document.createTextNode(commandObj.labelstub);
+    labelStub.appendChild(labelStubText);
+    //control objects (multiline) need list on label item
+    // if(commandObj.type === "control"){
+    //     labelStub = wrapElementInLi(labelStub);
+    // }
+    domElem.appendChild(labelStub);
+
+    //add parameters
+    if(commandObj.parameters){
+        var openBracket = document.createElement("span");
+        openBracket.appendChild(document.createTextNode("("));
+        domElem.appendChild(openBracket);
+        var i = 0;
+        for(var param in commandObj.parameters){
+            if (commandObj.parameters.hasOwnProperty(param)) {
+                var paramNode = document.createElement("span");
+                paramNode.classList.add("param");
+                //add type to param
+                paramNode.setAttribute("param-type", commandObj.parameters[param].type);
+
+                var param = commandObj.parameters[param];
+                if(param.type === "color"){
+                    var paramString = "\"" + param.value + "\"";
+                }else{
+                    var paramString = param.value;
+                }
+                paramNode.setAttribute("data-default-value", paramString);
+                paramNode.appendChild(document.createTextNode(paramString));
+                domElem.appendChild(paramNode);
+                var paramCount = Object.keys(commandObj.parameters).length;
+                if(i < paramCount - 1){
+                    var comma = document.createElement("span");
+                    comma.appendChild(document.createTextNode(", "));
+                    domElem.appendChild(comma);
+                }
+                i++;
+            }
+        }
+        if(commandObj.type != "control"){
+            var closeBracket = document.createElement("span");
+            if(commandObj.type != "value"){
+                closeBracket.appendChild(document.createTextNode(");"));
+            }else{
+                closeBracket.appendChild(document.createTextNode(")"));
+            }
+            domElem.appendChild(closeBracket);
+        }
+    }
+    if(commandObj.type === "control"){
+        //labelStub.style.display = "block";
+        var empty = createEmptyLine();
+        // empty = wrapElementInLi(empty);
+        domElem.appendChild(empty);
+        var labelClose = document.createElement("span");
+        labelClose.classList.add("labelclose");
+        var labelCloseText = document.createTextNode(commandObj.labelclose);
+        labelClose.appendChild(labelCloseText);
+        // labelClose = wrapElementInLi(labelClose);
+        domElem.appendChild(labelClose);
+    }else if(commandObj.type === "function"){
+        // domElem = wrapElementInLi(domElem);
+    }
+
+    domElem.addEventListener("click", function(event){
         if(event.target.classList.contains("codeblock")){
             moveCursor(event.target);
         }
     });
 
+
+    //Insert created element into the DOM (needs to out where to insert).
+    //TODO: move this logic out of the create element function
     var carat = document.querySelector(".carat");
     var highlight = document.querySelector(".highlight");
     var editing = document.querySelector(".editing");
-
 
     if(commandObj){
         //if param, insert over current highlight value, or error
         if(commandObj.type === "value"){
             if(highlight){
-                highlight.parentNode.replaceChild(codeInsert, highlight);
+                highlight.parentNode.replaceChild(domElem, highlight);
             }
         //not param, so replace line, or insert new line
         }else{
@@ -295,40 +312,40 @@ function createCodeElement(e, commandObj) {
                 if(!carat.parentNode.classList.contains("emptyLine")){
                     var nextEditable = getNextEditableParam(carat);
                     //var caratPos = carat.parentNode.nextSibling;
-                    nextEditable.parentNode.insertBefore(codeInsert, nextEditable);
+                    nextEditable.parentNode.insertBefore(domElem, nextEditable);
                 }else{
                     // insert code before empty line
                     var empty = carat.parentNode;
-                    empty.parentNode.insertBefore(codeInsert, empty);
+                    empty.parentNode.insertBefore(domElem, empty);
                 }
             }
             if(highlight){
                 var nextBlock = getNextCodeblock(highlight);
-                nextBlock.parentNode.insertBefore(codeInsert, nextBlock);
-            //    highlight.parentNode.parentNode.insertBefore(codeInsert, highlight.parentNode.nextSibling);
+                nextBlock.parentNode.insertBefore(domElem, nextBlock);
+            //    highlight.parentNode.parentNode.insertBefore(domElem, highlight.parentNode.nextSibling);
             }
             if(editing){
-                editing.parentNode.parentNode.replaceChild(codeInsert, editing.parentNode);
+                editing.parentNode.parentNode.replaceChild(domElem, editing.parentNode);
             }
             if(!highlight && !carat && !editing){
                 var nextEmptyLine = document.querySelector(".emptyLine");
                 if(nextEmptyLine){
-                    nextEmptyLine.parentNode.insertBefore(codeInsert, nextEmptyLine);
+                    nextEmptyLine.parentNode.insertBefore(domElem, nextEmptyLine);
                 }else{
-                    codeContainer.insertBefore(codeInsert, nextEmptyLine);
+                    codeContainer.insertBefore(domElem, nextEmptyLine);
                 }
             }
         }
-        var label = codeInsert.querySelector(".label");
+        var label = domElem.querySelector(".label");
         if(label != undefined){
             label.addEventListener('click', editLine);
         }
-        var blocksList = codeInsert.querySelector(".emptyLine");
+        var blocksList = domElem.querySelector(".emptyLine");
         if(blocksList){
             //move carat to empty line.
             moveCursor(blocksList);
         }
-        var paramsList = codeInsert.querySelectorAll(".param");
+        var paramsList = domElem.querySelectorAll(".param");
         if(paramsList.length > 0){
             editParam(commandObj, paramsList[0]);
         }
@@ -340,6 +357,7 @@ function createCodeElement(e, commandObj) {
             }
         }
     }
+    updateLineNumbers();
 }
 
 
@@ -407,6 +425,22 @@ function changeToolbox(menuItem, commands){
     constructToolBoxTab(commands);
 }
 
+function updateLineNumbers(){
+    //TODO: stop replacing whole element each time!
+    var singleLines = codeContainer.querySelectorAll(".single-line-codeblock, .emptyLine");
+    var doubleLines = codeContainer.querySelectorAll(".multi-line-codeblock");
+    var lineCount = singleLines.length + doubleLines.length * 2;
+    var lineNumbers = document.createElement("div");
+    for(var i = 0; i < lineCount; i++){
+        var lineNumber = document.createElement("span");
+        lineNumber.appendChild(document.createTextNode(i + 1));
+        lineNumbers.appendChild(lineNumber);
+    }
+    var lineNumberContainer = document.querySelector(".line-numbers");
+    lineNumberContainer.innerHTML = "";
+    lineNumberContainer.appendChild(lineNumbers);
+}
+
 function init(){
     //create menu
     for (var key in commands) {
@@ -423,6 +457,10 @@ function init(){
            })();
        }
     }
+
+    //add functionality to top menu
+    var refreshBtn = topMenu.querySelector("#refresh");
+    refreshBtn.addEventListener("click", readCode);
 
     //create default empty line
     var empty = createEmptyLine();

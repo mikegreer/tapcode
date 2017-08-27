@@ -15,15 +15,42 @@
             box-sizing: border-box;
             overflow: hidden;
         }
+        li{
+            margin: 0;
+        }
+        .code-wrapper{
+            display: flex;
+            width: 100%;
+            overflow: scroll;
+        }
+        .line-numbers{
+            order: 1;
+            width: 20px;
+            flex-basis: auto;
+            padding-right: 4px;
+            padding: 20px 2px 0 0;
+            color: #666;
+        }
+        .line-numbers span{
+            text-align: right;
+            line-height: 26px;
+            vertical-align: middle;
+            display: block;
+            min-height: 26px;
+        }
         .code{
+            order: 1;
+            flex: 5;
+            padding: 20px 0 0 5px;
+            color: #fff;
+        }
+        .line-numbers, .code{
             box-sizing: border-box;
             display: block;
             height: 60vh;
-            color: #fff;
             font-family: monospace;
-            padding: 20px;
+            margin: 0;
             font-size: 16px;
-            overflow: scroll;
         }
         .toolbox{
             width: 100%;
@@ -86,9 +113,8 @@
             display: block;
             padding-right: 6px;
             min-height: 26px;
-            padding-bottom: 2px;
         }
-        .codeblock .label{
+        .codeblock .label, .labelclose{
             display: inline-block;
             line-height: 26px;
             vertical-align: middle;
@@ -149,8 +175,16 @@
                 <div class="menu-item">Kano</div>
                 <div class="menu-item">About</div>
                 <div class="menu-item">Shop</div>
+                <div class="menu-item">save</div>
+                <div class="menu-item">load</div>
+                <div class="menu-item" id="refresh">refresh</div>
             </div>
-            <div class="code"></div>
+
+            <div class="code-wrapper">
+                <div class="line-numbers"></div>
+                <div class="code"></div>
+            </div>
+
             <div class="toolbox">
                 <div class="toolbox-menu"></div>
                 <div class="numpad">
