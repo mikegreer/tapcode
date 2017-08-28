@@ -3,6 +3,9 @@ var ctx = canvas.getContext("2d");
 var cursorX = 0;
 var cursorY = 0;
 
+canvas.width = 500;
+canvas.height = 500;
+
 function readCode(){
     'use strict';
     resetCanvas();
@@ -31,7 +34,7 @@ function clearCanvas() {
     var alphaSave = ctx.globalAlpha;
     ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = "#2b3035";
     ctx.fillRect(0, 0, 400, 400);
     ctx.fillStyle = fillSave;
     ctx.globalAlpha = alphaSave;
@@ -42,7 +45,7 @@ function resetCanvas() {
     cursorY = 0;
     ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = "#2b3035";
     ctx.fillRect(0, 0, 400, 400);
     ctx.fillStyle = "#ff00ff";
     ctx.strokeStyle = "#00ffff";
@@ -94,6 +97,12 @@ function lineTo(startX, startY, endX, endY){
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
     ctx.stroke();
+}
+function background(color){
+    var tmpColor = ctx.fillStyle;
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = tmpColor;
 }
 
 function fillColor(c){

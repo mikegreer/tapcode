@@ -362,6 +362,7 @@ function createCodeElement(e, commandObj) {
     if(commandObj.parameters){
         var openBracket = document.createElement("span");
         openBracket.appendChild(document.createTextNode("("));
+        openBracket.classList.add("bracket");
         domElem.appendChild(openBracket);
         var i = 0;
         for(var param in commandObj.parameters){
@@ -396,6 +397,7 @@ function createCodeElement(e, commandObj) {
             }else{
                 closeBracket.appendChild(document.createTextNode(")"));
             }
+            closeBracket.classList.add("bracket");
             domElem.appendChild(closeBracket);
         }
     }
@@ -586,12 +588,14 @@ function init(){
     }
 
     //add functionality to top menu
-    var refreshBtn = topMenu.querySelector("#refresh");
+    var refreshBtn = document.querySelector("#refresh");
     refreshBtn.addEventListener("click", readCode);
-    var clearBtn = topMenu.querySelector("#clear");
+    var clearBtn = document.querySelector("#clear");
     clearBtn.addEventListener("click", function() {
         codeContainer.innerHTML = "";
         codeContainer.appendChild(createEmptyLine());
+        readCode();
+        updateLineNumbers();
     });
 
     var arrowLeft = document.querySelector("#arrow-left");

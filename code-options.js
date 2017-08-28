@@ -48,6 +48,16 @@ var commands = {
                 }
             }
         },
+        "background": {
+            "labelstub": "background",
+            "type": "function",
+            "parameters": {
+                "color": {
+                    "type": "color",
+                    "value": "#2b3035"
+                }
+            }
+        },
         "line": {
             "labelstub": "lineTo",
             "type": "function",

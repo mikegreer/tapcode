@@ -12,7 +12,7 @@
         }
         html, body {
             height: 100%;
-            background-color: #000;
+            background-color: #2b3035;
         }
         body{
             margin: 0;
@@ -28,7 +28,7 @@
             z-index: 1;
             top: 40px;
             left: 0;
-            width: 400px;
+            width: 100vw;
         }
         .wrapper{
             display: flex;
@@ -41,8 +41,11 @@
         .menu{
             width: 100%;
             height: 40px;
-            background-color: #333;
-            padding: 0 4px;
+            background-color: #33393d;
+            padding: 2px 4px 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center; /* align vertical */
         }
         .code-wrapper{
             display: flex;
@@ -55,36 +58,36 @@
         .toolbox-menu{
             width: 100%;
             height: 40px;
-            background-color: #333;
-            padding: 0 4px;
+            background-color: #33393d;
+            border-bottom: 1px solid #2b3035;
+            padding: 3px 4px 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center; /* align vertical */
         }
         .toolbox-wrapper{
             width: 100%;
             height: 146px;
             overflow: scroll;
             box-sizing: border-box;
-            background-color: #999;
+            background-color: #33393d;
         }
         /* end main page layout*/
 
-        .code{
-            padding: 12px 0 0 5px;
-            width: 100%;
-            color: #fff;
-        }
         .line-numbers{
             width: 20px;
             flex-basis: auto;
             padding-right: 4px;
             padding: 13px 2px 0 0;
-            color: #666;
+            color: #fff;
+            opacity: .4;
         }
         .line-numbers span{
             text-align: right;
-            line-height: 26px;
+            line-height: 30px;
             vertical-align: middle;
             display: block;
-            min-height: 26px;
+            min-height: 30px;
         }
         .line-numbers, .code{
             box-sizing: border-box;
@@ -96,8 +99,6 @@
 
         .menu-item{
             display: inline-block;
-            line-height: 40px;
-            vertical-align: middle;
             padding: 0 0 0 10px;
             color: #ffffff;
             cursor: pointer;
@@ -111,37 +112,65 @@
             display: block;
         }
         .soft-keys{
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            width: 84px;
+            position: fixed;
+            bottom: 202px;
+            right: 6px;
+            width: 92px;
             height: 40px;
+            display: flex;
+            flex-direction: row;
+        }
+        .code-actions{
+            position: absolute;
+            right: 12px;
+            top: 12px;
         }
         #arrow-left, #arrow-right{
             width: 40px;
             height: 40px;
-            background-color: #fff;
+            background-color: #33393d;
             border-radius: 3px;
-            opacity: .4;
             display: inline-block;
+            margin-right: 6px;
+            cursor: pointer;
             padding: 0;
+            display: flex;
+            justify-content: center; /* align horizontal */
+            align-items: center; /* align vertical */
+        }
+        #arrow-left:active, #arrow-right:active{
+            background-color: #fff;
+        }
+        #arrow-left img{
+            width: 12px;
+            display: block;
+            transform: rotate(180deg);
+        }
+        #arrow-right img{
+            width: 12px;
+            display: block;
         }
 
         /*code editing styles*/
+        .code{
+            padding: 12px 0 0 16px;
+            width: 100%;
+            color: #fff;
+        }
         .highlight{
-            color: #000;
-            background-color: #fff;
+            color: #2b3035 !important;
+            background-color: #fff !important;
         }
         .editing{
-            color: #000;
+            color: #2b3035 !important;
             background-color: #fff;
         }
         .param{
             cursor: pointer;
         }
         .tapinput{
-            padding: 8px 12px;
-            background-color: #333;
+            padding: 10px 12px;
+            background-color: #23272b;
             border-radius: 3px;
             margin: 8px 8px 0 0;
             color: #fff;
@@ -149,16 +178,29 @@
             font-family: monospace;
             display: inline-block;
         }
+        .bracket{
+            color: #e0915a;
+        }
+        .param{
+            color: #7dc6ba;
+        }
+        .tapinput:active{
+            background-color: #fff;
+            color: #000;
+        }
+        .label, .param{
+            background-color: rgba(48, 43, 58, .8);
+        }
         .codeblock{
             display: block;
             padding-right: 6px;
-            min-height: 26px;
+            min-height: 30px;
         }
         .codeblock .label, .labelclose{
             display: inline-block;
-            line-height: 26px;
+            line-height: 30px;
             vertical-align: middle;
-            min-height: 26px;
+            min-height: 30px;
         }
         .inline-codeblock{
             display: inline-block;
@@ -188,11 +230,26 @@
         }
         .numgrid, .colorgrid{
             flex: 3;
-            padding: 10px;
+            padding: 7px;
             text-align: center;
             font-family: monospace;
-            border: 1px solid #eee;
+            border-radius: 3px;
+            margin: 2px;
+            border: 1px solid #2b3035;
+            color: #fff;
             cursor: pointer;
+        }
+        .logo{
+            height: 18px;
+            margin-left: 10px;
+        }
+        .burger-stack{
+            height: 18px;
+            background-color: #2b3034;
+            width: 18px;
+            display: block;
+            position: absolute;
+            right: 12px;
         }
 
         </style>
@@ -202,20 +259,23 @@
         <div class="wrapper">
 
             <div class="menu">
-                <div class="menu-item">Kano</div>
-
-                <div class="menu-item">codeset</div>
+                <img src="kano.svg" class="logo" />
+                <span class="burger-stack"></span>
+                <!-- <div class="menu-item">codeset</div>
                 <div class="menu-item">save</div>
-                <div class="menu-item">load</div>
-                <div class="menu-item" id="clear">clear</div>
-                <div class="menu-item" id="refresh">refresh</div>
+                <div class="menu-item">load</div> -->
             </div>
 
             <div class="code-wrapper">
+
+                <div class="code-actions">
+                    <div class="menu-item" id="clear">clear</div>
+                    <div class="menu-item" id="refresh">refresh</div>
+                </div>
                 <div class="line-numbers"></div>
                 <div class="soft-keys">
-                    <div id="arrow-left"></div>
-                    <div id="arrow-right"></div>
+                    <div id="arrow-left"><img src="arrow.svg" /></div>
+                    <div id="arrow-right"><img src="arrow.svg" /></div>
                 </div>
                 <div class="code"></div>
             </div>
