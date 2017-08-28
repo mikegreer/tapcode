@@ -91,19 +91,45 @@ function moveToPreviousEditable() {
 
     var previousEditable;
     if(carat){
-        previousEditable = getPreviousCodeblock(carat.parentNode);
-        var params = previousEditable.querySelectorAll(".param");
-        if(params.length > 0){
-            previousEditable = params[params.length - 1];
+        var codeOnLine = carat.parentNode.querySelector(".label");
+        if(codeOnLine){
+            //cursor on end of line with code. Move in to last param or label.
+            var paramsAndLabels = carat.parentNode.querySelectorAll(".label, .param");
+            previousEditable = paramsAndLabels[paramsAndLabels.length - 1];
+        }else{
+            //moving from empty line to code block above
+            previousEditable = getPreviousCodeblock(carat.parentNode);
+            if(previousEditable){
+                emptyLines = previousEditable.querySelectorAll(".emptyLine");
+                if(emptyLines.length > 0){
+                    previousEditable = emptyLines[emptyLines.length - 1];
+                }else{
+                    var params = previousEditable.querySelectorAll(".param");
+                    if(params.length > 0){
+                        previousEditable = params[params.length - 1];
+                    }
+                }
+            }else{
+                previousEditable = carat.parentNode.previousSibling;
+            }
         }
     }
     if(highlight){
         previousEditable = getPreviousEditableParam(highlight);
     }
     if(editing){
-        var previousBlock = getPreviousCodeblock(editing.parentNode)
-        var previousBlockParams = previousBlock.querySelectorAll(".param");
-        previousEditable = previousBlockParams[previousBlockParams.length - 1];
+        var codeBlocks = codeContainer.querySelectorAll(".codeblock");
+        if(editing.parentNode === codeBlocks[0]){
+            previousEditable = codeBlocks[codeBlocks.length - 1];
+        }else{
+            var previousBlock = editing.parentNode.previousSibling;
+            var previousBlockParams = previousBlock.querySelectorAll(".param");
+            if(previousBlockParams.length > 0){
+                previousEditable = previousBlockParams[previousBlockParams.length - 1];
+            }else{
+                previousEditable = previousBlock;
+            }
+        }
     }
     clearCursors();
 
@@ -134,6 +160,10 @@ function moveToNextEditable() {
     var nextEditable;
     if(carat){
         nextEditable = getNextCodeblock(carat);
+        if(!nextEditable){
+            var codeblock = codeContainer.querySelector(".codeblock");
+            nextEditable = codeblock.querySelector(".label");
+        }
     }
     if(highlight){
         nextEditable = getNextEditableParam(highlight);
@@ -175,14 +205,12 @@ function getNextCodeblock(currentElement){
         //nothing at this level, move up one.
         nextBlock = nextByClass(currentCodeBlock.parentNode, "codeblock");
     }
-    console.log(nextBlock);
     return nextBlock;
 }
 
 function getPreviousCodeblock(currentElement){
-    //traverse up from currentElement untill hits codeblock
+    //TODO: traverse up from currentElement untill hits codeblock
     var currentCodeBlock;
-    console.log(currentElement);
     if(currentElement.classList.contains("codeblock")){
         currentCodeBlock = currentElement;
     }
@@ -194,25 +222,7 @@ function getPreviousCodeblock(currentElement){
         //nothing at this level, move up one.
         previousBlock = previousByClass(currentCodeBlock.parentNode, "codeblock");
     }
-    console.log(previousBlock);
     return previousBlock;
-}
-
-function advanceCursor(){
-    var currentHighlight = document.querySelector(".highlight");
-    if(currentHighlight){
-        currentHighlight.classList.remove("highlight");
-        var nextParam = currentHighlight.nextSibling.nextSibling;
-        if(nextParam){
-            nextParam.classList.add("highlight");
-            parameterClicked(nextParam);
-        }else{
-            var nextObject = getNextEditableParam(currentHighlight);
-            if(nextObject){
-                nextObject.classList.add("highlight");
-            }
-        }
-    }
 }
 
 function editParam(commandObj, param){
@@ -272,7 +282,7 @@ function numPressed(target){
             }
         }
         hideNumpad();
-        advanceCursor();
+        moveToNextEditable();
         readCode();
     }
 }
@@ -285,7 +295,7 @@ function colorPressed(target){
     param.childNodes[0].nodeValue = newValue;
     param.setAttribute("data-default-value", newValue);
     hideColorgrid();
-    advanceCursor();
+    moveToNextEditable();
     readCode();
 }
 
@@ -585,9 +595,15 @@ function init(){
     });
 
     var arrowLeft = document.querySelector("#arrow-left");
-    arrowLeft.addEventListener("click", moveToPreviousEditable);
+    arrowLeft.addEventListener("click", function() {
+        moveToPreviousEditable();
+        readCode();
+    });
     var arrowRight = document.querySelector("#arrow-right");
-    arrowRight.addEventListener("click", moveToNextEditable);
+    arrowRight.addEventListener("click", function() {
+        moveToNextEditable();
+        readCode();
+    });
 
     //create default empty line
     var empty = createEmptyLine();
