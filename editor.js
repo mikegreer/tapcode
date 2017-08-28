@@ -61,8 +61,28 @@ function getNextEditableParam(currentElement){
     }
 }
 
+function getPreviousEditableParam(currentElement){
+    var params = currentElement.parentNode.querySelectorAll(".param");
+    var param;
+    //if cursor on an attribute / param
+    for(var i = 0; i < params.length; i++){
+        if(params[i] === currentElement){
+            param = params[i - 1];
+            if(i - 1 >= 0){
+                return params[i - 1];
+            }else{
+                return currentElement.parentNode.querySelector(".label");
+            }
+        }
+    }
+}
+
 function moveToPreviousEditable() {
-    //cursor on end of line
+    /*
+    order or elements:
+    label, parameters, child codeblock
+    */
+    //cursor on end of line or blank line
     var carat = document.querySelector(".carat");
     //cursor highlighting param
     var highlight = document.querySelector(".highlight");
@@ -71,18 +91,21 @@ function moveToPreviousEditable() {
 
     var previousEditable;
     if(carat){
-        carat.classList.remove("carat");
-        previousEditable = getPreviousCodeblock(carat);
+        previousEditable = getPreviousCodeblock(carat.parentNode);
+        var params = previousEditable.querySelectorAll(".param");
+        if(params.length > 0){
+            previousEditable = params[params.length - 1];
+        }
     }
     if(highlight){
-        highlight.classList.remove("highlight");
-        previousEditable = getNextEditableParam(highlight);
+        previousEditable = getPreviousEditableParam(highlight);
     }
     if(editing){
-        editing.classList.remove("editing");
-        labelsAndParams = editing.parentNode.querySelectorAll(".param, .label");
-        previousEditable = labelsAndParams[1];
+        var previousBlock = getPreviousCodeblock(editing.parentNode)
+        var previousBlockParams = previousBlock.querySelectorAll(".param");
+        previousEditable = previousBlockParams[previousBlockParams.length - 1];
     }
+    clearCursors();
 
     if(previousEditable.classList.contains("param")){
         previousEditable.classList.add("highlight");
@@ -101,7 +124,7 @@ function moveToPreviousEditable() {
 }
 
 function moveToNextEditable() {
-    //cursor on end of line
+    //cursor on end of line or empty line
     var carat = document.querySelector(".carat");
     //cursor highlighting param
     var highlight = document.querySelector(".highlight");
@@ -110,18 +133,16 @@ function moveToNextEditable() {
 
     var nextEditable;
     if(carat){
-        carat.classList.remove("carat");
         nextEditable = getNextCodeblock(carat);
     }
     if(highlight){
-        highlight.classList.remove("highlight");
         nextEditable = getNextEditableParam(highlight);
     }
     if(editing){
-        editing.classList.remove("editing");
         labelsAndParams = editing.parentNode.querySelectorAll(".param, .label, .emptyLine");
         nextEditable = labelsAndParams[1];
     }
+    clearCursors();
 
     if(nextEditable.classList.contains("param")){
         nextEditable.classList.add("highlight");
@@ -137,6 +158,7 @@ function moveToNextEditable() {
     else if(nextEditable.classList.contains("label")){
         nextEditable.classList.add("editing");
     }
+
 }
 
 function getNextCodeblock(currentElement){
@@ -160,6 +182,7 @@ function getNextCodeblock(currentElement){
 function getPreviousCodeblock(currentElement){
     //traverse up from currentElement untill hits codeblock
     var currentCodeBlock;
+    console.log(currentElement);
     if(currentElement.classList.contains("codeblock")){
         currentCodeBlock = currentElement;
     }
