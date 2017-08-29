@@ -2,7 +2,7 @@
 
 var codeContainer = document.querySelector('.code');
 var toolbox = document.querySelector('.toolbox');
-var menu = document.querySelector(".toolbox-menu");
+var menu = document.querySelector(".toolbox-menu .code-menu");
 var topMenu = document.querySelector(".menu");
 
 function clearCursors(){
@@ -301,11 +301,17 @@ function colorPressed(target){
 
 function hideNumpad(){
     var numPad = document.querySelector(".numpad");
+    var numberMenu = document.querySelector(".param-input-menu");
     numPad.style.display = "none";
+    numberMenu.style.display = "none";
+    menu.style.display = "block";
 }
 function showNumpad(){
     var numPad = document.querySelector(".numpad");
+    var numberMenu = document.querySelector(".param-input-menu");
     numPad.style.display = "block";
+    numberMenu.style.display = "flex";
+    menu.style.display = "none";
 }
 
 function hideColorgrid(){
@@ -613,17 +619,30 @@ function init(){
     var empty = createEmptyLine();
     codeContainer.appendChild(empty);
 
-    // ADD ENTER BUTTON
-    // var inputElement = document.createElement("span");
-    // var inputElementLabel = document.createTextNode("enter");
-    // inputElement.appendChild(inputElementLabel);
-    // inputElement.id = "enter";
-    // inputElement.classList.add("tapinput");
-    // inputElement.addEventListener("click", advanceCursor);
-    // toolbox.appendChild(inputElement);
 
     //create toolbox
     changeToolbox(document.querySelector(".menu-item"), commands.drawing);
+
+
+    //construct param input menu
+    var paramMenu = document.querySelector(".param-input-menu");
+    var openNumpadLink = document.createElement("span");
+    openNumpadLink.appendChild(document.createTextNode("numbers"));
+    openNumpadLink.classList.add("underline");
+    openNumpadLink.classList.add("menu-item");
+    openNumpadLink.addEventListener("click", function() {
+        showNumpad();
+        this.classList.add("underline");
+    });
+    paramMenu.appendChild(openNumpadLink);
+    var openCodeMenu = document.createElement("span");
+    openCodeMenu.appendChild(document.createTextNode("code"));
+    openCodeMenu.classList.add("menu-item");
+    openCodeMenu.addEventListener("click", function() {
+        hideNumpad();
+        this.classList.add("underline");
+    });
+    paramMenu.appendChild(openCodeMenu);
 
     //add listeners to numpad
     var numBlocks = document.querySelectorAll(".numgrid");

@@ -163,7 +163,7 @@
         }
         .editing{
             color: #2b3035 !important;
-            background-color: #fff;
+            background-color: #fff !important;
         }
         .param{
             cursor: pointer;
@@ -215,8 +215,8 @@
         }
         .carat{
             width: 14px;
-            height: 18px;
-            margin-bottom: -5px;
+            height: 20px;
+            margin-top: 5px;
             display: inline-block;
             background-color: #fff;
         }
@@ -235,7 +235,7 @@
             font-family: monospace;
             border-radius: 3px;
             margin: 2px;
-            border: 1px solid #2b3035;
+            background-color: #2b3035;
             color: #fff;
             cursor: pointer;
         }
@@ -250,6 +250,20 @@
             display: block;
             position: absolute;
             right: 12px;
+        }
+        .param-input-menu{
+            display: none;
+            width: 100%;
+            height: 40px;
+            background-color: #33393d;
+            border-bottom: 1px solid #2b3035;
+            padding: 2px 4px 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center; /* align vertical */
+        }
+        .underline{
+            text-decoration: underline;
         }
 
         </style>
@@ -280,7 +294,10 @@
                 <div class="code"></div>
             </div>
 
-            <div class="toolbox-menu"></div>
+            <div class="param-input-menu"></div>
+            <div class="toolbox-menu">
+                <div class="code-menu"></div>
+            </div>
             <div class="toolbox-wrapper">
                 <div class="toolbox">
                     <div class="numpad">
