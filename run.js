@@ -78,6 +78,10 @@ function moveTo(x, y){
     cursorX = x;
     cursorY = y;
 }
+function moveToRandom(){
+    cursorX = Math.random()*500;
+    cursorY = Math.random()*500;
+}
 function moveBy(x, y){
     cursorX += x;
     cursorY +=y;

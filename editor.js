@@ -5,6 +5,7 @@ var toolbox = document.querySelector('.toolbox');
 var menu = document.querySelector(".toolbox-menu .code-menu");
 var topMenu = document.querySelector(".menu");
 
+/* code editor ----------------------------- */
 function clearCursors(){
     var carat = document.querySelector(".carat")
     if(carat){
@@ -257,72 +258,6 @@ function editLine(e){
     e.target.classList.add("editing");
 }
 
-function numPressed(target){
-    var attr = target.getAttribute("data-value");
-    if(!isNaN(parseInt(attr)) || attr === "."){
-        var param = document.querySelector(".highlight");
-        if(param.hasAttribute("data-value")){
-            var currentValue = param.getAttribute("data-value");
-            var newValue = currentValue + target.getAttribute("data-value");
-        }else{
-            var newValue = target.getAttribute("data-value");
-        }
-        param.setAttribute("data-value", newValue);
-        param.childNodes[0].nodeValue = newValue;
-    }
-    if(attr === "done"){
-        var param = document.querySelector(".highlight");
-        if(param != null){
-            if(param.getAttribute("param-type") === "number"){
-                //editor is currently editing value
-                var newValue = param.getAttribute("data-value");
-                if(newValue != null && newValue != ""){
-                    param.setAttribute("data-default-value", newValue);
-                }
-            }
-        }
-        hideNumpad();
-        moveToNextEditable();
-        readCode();
-    }
-}
-
-function colorPressed(target){
-    hideNumpad();
-    var param = document.querySelector(".highlight");
-    var newValue = "\"" + target.getAttribute("data-value") + "\"";
-    param.setAttribute("data-value", newValue);
-    param.childNodes[0].nodeValue = newValue;
-    param.setAttribute("data-default-value", newValue);
-    hideColorgrid();
-    moveToNextEditable();
-    readCode();
-}
-
-function hideNumpad(){
-    var numPad = document.querySelector(".numpad");
-    var numberMenu = document.querySelector(".param-input-menu");
-    numPad.style.display = "none";
-    numberMenu.style.display = "none";
-    menu.style.display = "block";
-}
-function showNumpad(){
-    var numPad = document.querySelector(".numpad");
-    var numberMenu = document.querySelector(".param-input-menu");
-    numPad.style.display = "block";
-    numberMenu.style.display = "flex";
-    menu.style.display = "none";
-}
-
-function hideColorgrid(){
-    var colorpad = document.querySelector(".colorpad");
-    colorpad.style.display = "none";
-}
-function showColorgrid(){
-    var colorpad = document.querySelector(".colorpad");
-    colorpad.style.display = "block";
-}
-
 function createEmptyLine(){
     var codeInsert = document.createElement("span")
     codeInsert.classList.add("codeblock");
@@ -375,6 +310,7 @@ function createCodeElement(e, commandObj) {
             if (commandObj.parameters.hasOwnProperty(param)) {
                 var paramNode = document.createElement("span");
                 paramNode.classList.add("param");
+                paramNode.setAttribute("data-sign", "");
                 //add type to param
                 paramNode.setAttribute("param-type", commandObj.parameters[param].type);
 
@@ -444,8 +380,10 @@ function createCodeElement(e, commandObj) {
         //not param, so replace line, or insert new line
         }else{
             if(carat){
+                console.log(carat);
                 if(!carat.parentNode.classList.contains("emptyLine")){
                     var nextEditable = getNextEditableParam(carat);
+                    console.log(nextEditable);
                     //var caratPos = carat.parentNode.nextSibling;
                     nextEditable.parentNode.insertBefore(domElem, nextEditable);
                 }else{
@@ -495,6 +433,109 @@ function createCodeElement(e, commandObj) {
     updateLineNumbers();
 }
 
+function toggleValueSign() {
+    var editing = document.querySelector(".highlight");
+    if(editing){
+        console.log(editing);
+        var value = editing.childNodes[0].nodeValue;
+        if(value.charAt(0) === "-"){
+            editing.setAttribute("data-sign", "");
+            value = value.substring(1);
+        }else{
+            editing.setAttribute("data-sign", "-");
+            value = "-" + value;
+        }
+        editing.childNodes[0].nodeValue = value;
+    }
+}
+
+
+/* input ('keyboard') ----------------------------- */
+function numPressed(target){
+    var attr = target.getAttribute("data-value");
+    if(!isNaN(parseInt(attr)) || attr === "."){
+        var param = document.querySelector(".highlight");
+        if(param.hasAttribute("data-value")){
+            var currentValue = param.getAttribute("data-value");
+            var newValue = currentValue + target.getAttribute("data-value");
+        }else{
+            var newValue = target.getAttribute("data-value");
+        }
+        param.setAttribute("data-value", newValue);
+        var sign = param.getAttribute("data-sign");
+        // if(newValue.charAt(0) === "-"){
+        //     newValue = "-" + newValue;
+        // }
+        param.childNodes[0].nodeValue = sign + newValue;
+    }
+    if(attr === "done"){
+        var param = document.querySelector(".highlight");
+        if(param != null){
+            if(param.getAttribute("param-type") === "number"){
+                //editor is currently editing value
+                var newValue = param.getAttribute("data-value");
+                if(newValue != null && newValue != ""){
+                    param.setAttribute("data-default-value", newValue);
+                }
+            }
+        }
+        hideNumpad();
+        moveToNextEditable();
+        readCode();
+    }
+}
+
+function colorPressed(target){
+    hideNumpad();
+    var param = document.querySelector(".highlight");
+    var newValue = "\"" + target.getAttribute("data-value") + "\"";
+    param.setAttribute("data-value", newValue);
+    param.childNodes[0].nodeValue = newValue;
+    param.setAttribute("data-default-value", newValue);
+    hideColorgrid();
+    moveToNextEditable();
+    readCode();
+}
+
+function hideNumpad(){
+    var numPad = document.querySelector(".numpad");
+    var numberMenu = document.querySelector(".param-input-menu");
+    numPad.style.display = "none";
+    menu.style.display = "block";
+    //only remove number menu if not currently highlighting number input
+    var highlight = document.querySelector(".highlight");
+    if(!highlight){
+        numberMenu.style.display = "none";
+    }
+}
+function showNumpad(){
+    var numPad = document.querySelector(".numpad");
+    var numberMenu = document.querySelector(".param-input-menu");
+    var codeInputs = document.querySelector(".tab");
+    var numberSubMenu = document.querySelector(".number-menu");
+    setParamMenuFocus(numberMenu.querySelector(".numbers"));
+    numberSubMenu.style.display = "block";
+    numPad.style.display = "block";
+    numberMenu.style.display = "flex";
+    menu.style.display = "none";
+    codeInputs.style.display = "none";
+}
+function showCodeInputs(){
+    var codeInputs = document.querySelector(".tab");
+    var numPad = document.querySelector(".numpad");
+    codeInputs.style.display = "block";
+    numPad.style.display = "none";
+    menu.style.display = "block";
+}
+
+function hideColorgrid(){
+    var colorpad = document.querySelector(".colorpad");
+    colorpad.style.display = "none";
+}
+function showColorgrid(){
+    var colorpad = document.querySelector(".colorpad");
+    colorpad.style.display = "block";
+}
 
 //label for toolbox
 function createLabel(commandObj){
@@ -576,6 +617,13 @@ function updateLineNumbers(){
     lineNumberContainer.appendChild(lineNumbers);
 }
 
+function setParamMenuFocus(current){
+    var numberMenu = document.querySelector(".param-input-menu");
+    var underline = numberMenu.querySelector(".underline");
+    underline.classList.remove("underline");
+    current.classList.add("underline");
+}
+
 function init(){
     //create menu
     for (var key in commands) {
@@ -630,19 +678,36 @@ function init(){
     openNumpadLink.appendChild(document.createTextNode("numbers"));
     openNumpadLink.classList.add("underline");
     openNumpadLink.classList.add("menu-item");
+    openNumpadLink.classList.add("numbers");
     openNumpadLink.addEventListener("click", function() {
         showNumpad();
-        this.classList.add("underline");
+        setParamMenuFocus(this);
     });
     paramMenu.appendChild(openNumpadLink);
     var openCodeMenu = document.createElement("span");
     openCodeMenu.appendChild(document.createTextNode("code"));
     openCodeMenu.classList.add("menu-item");
     openCodeMenu.addEventListener("click", function() {
-        hideNumpad();
-        this.classList.add("underline");
+        showCodeInputs();
+        setParamMenuFocus(this);
     });
     paramMenu.appendChild(openCodeMenu);
+
+    numberMenuInner = document.querySelector(".number-menu");
+    var minus = document.createElement("span");
+    minus.classList.add("menu-item");
+    minus.appendChild(document.createTextNode("-"));
+    minus.addEventListener("click", function(){
+        toggleValueSign();
+    });
+    numberMenuInner.appendChild(minus);
+
+    var backspace = document.createElement("span");
+    backspace.classList.add("menu-item");
+    backspace.appendChild(document.createTextNode("<-"));
+    numberMenuInner.appendChild(backspace);
+
+    console.log(numberMenuInner);
 
     //add listeners to numpad
     var numBlocks = document.querySelectorAll(".numgrid");

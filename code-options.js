@@ -14,6 +14,11 @@ var commands = {
                 }
             }
         },
+        "moveToRandom": {
+            "labelstub": "moveToRandom",
+            "type": "function",
+            "parameters": {}
+        },
         "moveBy": {
             "labelstub": "moveBy",
             "type": "function",
